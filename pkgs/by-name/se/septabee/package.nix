@@ -5,6 +5,17 @@
   p7zip,
   libgcc,
   libx11,
+  kdePackages,
+  libxkbcommon,
+  vulkan-loader,
+  libdecor,
+  zstd,
+  libdrm,
+  xz,
+  bzip2,
+  libxcb-keysyms,
+  systemd,
+  glibc
 }:
 
 stdenv.mkDerivation {
@@ -22,8 +33,18 @@ stdenv.mkDerivation {
     libx11
     libgcc
     stdenv.cc.cc.lib
+    kdePackages.wayland
+    libxkbcommon
+    vulkan-loader
+    libdecor
+    zstd
+    libdrm
+    xz
+    bzip2
+    libxcb-keysyms
+    systemd
+    glibc
   ];
-
   installPhase = ''
     runHook preInstall
     mkdir -p $out/bin
@@ -33,5 +54,44 @@ stdenv.mkDerivation {
     chmod +x $out/bin/septabee
     runHook postInstall
   '';
+  postFixup = ''
+    patchelf --add-needed libwayland-client.so.0 $out/share/septabee/septabee
+    patchelf --add-needed libxkbcommon.so.0 $out/share/septabee/septabee
+    patchelf --add-needed libvulkan.so $out/share/septabee/septabee
+    patchelf --add-needed librt.so.1 $out/share/septabee/septabee
+    patchelf --add-needed libdecor-0.so.0 $out/share/septabee/septabee
+    patchelf --add-needed libdrm_amdgpu.so.1 $out/share/septabee/septabee
+    patchelf --add-needed librt.so.1 $out/share/septabee/septabee
+    patchelf --add-needed libzstd.so.1 $out/share/septabee/septabee
+    patchelf --add-needed liblzma.so.5 $out/share/septabee/septabee
+    patchelf --add-needed libbz2.so.1 $out/share/septabee/septabee
+    patchelf --add-needed libxcb-keysyms.so.1 $out/share/septabee/septabee
+    patchelf --add-needed libsystemd.so.0 $out/share/septabee/septabee
 
+    patchelf --add-needed libwayland-client.so.0 $out/share/septabee/septabee-watchdawg
+    patchelf --add-needed libxkbcommon.so.0 $out/share/septabee/septabee-watchdawg
+    patchelf --add-needed libvulkan.so $out/share/septabee/septabee-watchdawg
+    patchelf --add-needed librt.so.1 $out/share/septabee/septabee-watchdawg
+    patchelf --add-needed libdecor-0.so.0 $out/share/septabee/septabee-watchdawg
+    patchelf --add-needed libdrm_amdgpu.so.1 $out/share/septabee/septabee-watchdawg
+    patchelf --add-needed librt.so.1 $out/share/septabee/septabee-watchdawg
+    patchelf --add-needed libzstd.so.1 $out/share/septabee/septabee-watchdawg
+    patchelf --add-needed liblzma.so.5 $out/share/septabee/septabee-watchdawg
+    patchelf --add-needed libbz2.so.1 $out/share/septabee/septabee-watchdawg
+    patchelf --add-needed libxcb-keysyms.so.1 $out/share/septabee/septabee-watchdawg
+    patchelf --add-needed libsystemd.so.0 $out/share/septabee/septabee-watchdawg
+
+    patchelf --add-needed libwayland-client.so.0 $out/share/septabee/septabee-sounds
+    patchelf --add-needed libxkbcommon.so.0 $out/share/septabee/septabee-sounds
+    patchelf --add-needed libvulkan.so $out/share/septabee/septabee-sounds
+    patchelf --add-needed librt.so.1 $out/share/septabee/septabee-sounds
+    patchelf --add-needed libdecor-0.so.0 $out/share/septabee/septabee-sounds
+    patchelf --add-needed libdrm_amdgpu.so.1 $out/share/septabee/septabee-sounds
+    patchelf --add-needed librt.so.1 $out/share/septabee/septabee-sounds
+    patchelf --add-needed libzstd.so.1 $out/share/septabee/septabee-sounds
+    patchelf --add-needed liblzma.so.5 $out/share/septabee/septabee-sounds
+    patchelf --add-needed libbz2.so.1 $out/share/septabee/septabee-sounds
+    patchelf --add-needed libxcb-keysyms.so.1 $out/share/septabee/septabee-sounds
+    patchelf --add-needed libsystemd.so.0 $out/share/septabee/septabee-sounds
+  '';
 }
