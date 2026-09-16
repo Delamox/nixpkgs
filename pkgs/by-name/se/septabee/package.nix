@@ -79,6 +79,8 @@ in stdenv.mkDerivation {
         libxkbcommon
       ]}:/run/opengl-driver/lib:/run/opengl-driver-32/lib"
     runHook postInstall
+
+    mkdir -p $out/share/applications
     cat <<INI > $out/share/applications/septabee.desktop
     [Desktop Entry]
     Name=septabee
