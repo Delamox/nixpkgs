@@ -21,10 +21,15 @@
   pipewire,
   libjack2,
   libGL,
+  makeDesktopItem
 }:
 let
   name = "septabee";
   version = "B_T9";
+    icon = fetchurl {
+    url = "https://septabee.nekoweb.org/important_stuff/icon.png";
+    sha256 = "sha256-snq/nOYU2gPzC4VR558VjeQ8oXmQE82IolNDDixvtTU=";
+  };
 in stdenv.mkDerivation {
   name = name;
   pname = name;
@@ -79,24 +84,17 @@ in stdenv.mkDerivation {
         libxkbcommon
       ]}:/run/opengl-driver/lib:/run/opengl-driver-32/lib"
     runHook postInstall
-
-    mkdir -p $out/share/applications
-    cat <<INI > $out/share/applications/septabee.desktop
-    [Desktop Entry]
-    Name=septabee
-    Exec=$out/bin/septabee %f
-    Type=Application
-    Terminal=false
-    INI
   '';
-    # Icon=$out/share/hypatia/img/Hypatia_48.ico
 
-  # mkDesktopItem = {
-  #   name = name;
-  #   desktopName = name;
-  #   comment = "A DAW built around audio rate parameter modulation and a ridiculous amount of optimization.";
-  #   exec = "$out/bin/septabee";
-  # };
+  desktopItems = [
+    (makeDesktopItem {
+      name = name;
+      desktopName = name;
+      icon = icon;
+      comment = "A DAW built around audio rate parameter modulation and a ridiculous amount of optimization.";
+      exec = "septabee";
+    })
+  ];
 
   meta = {
     homepage = "https://septabee.nekoweb.org";
