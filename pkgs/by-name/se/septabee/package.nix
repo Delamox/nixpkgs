@@ -1,11 +1,12 @@
 {
+  lib,
   stdenv,
   fetchurl,
   autoPatchelfHook,
   p7zip,
-  libgcc,
+  makeWrapper,
   libx11,
-  kdePackages,
+  wayland,
   libxkbcommon,
   vulkan-loader,
   libdecor,
@@ -15,25 +16,32 @@
   bzip2,
   libxcb-keysyms,
   systemd,
-  glibc
+  alsa-lib,
+  libpulseaudio,
+  pipewire,
+  libjack2,
+  libGL,
 }:
-
-stdenv.mkDerivation {
-  pname = "septabee";
-  version = "0.0";
+let
+  name = "septabee";
+  version = "B_T9";
+in stdenv.mkDerivation {
+  name = name;
+  pname = name;
+  version = version;
   src = fetchurl {
-    url = "https://septabee.nekoweb.org/important_stuff/SEPTABEE_DOWNLOADS/version_B/septabee_linux_B_T9_offline.7z";
+    url = "https://septabee.nekoweb.org/important_stuff/SEPTABEE_DOWNLOADS/version_B/septabee_linux_${version}_offline.7z";
     hash = "sha256-3sFcqSShKTokOHXsKkP/rpGsIOQeDKsqlq0G/gNkPt0=";
   };
   nativeBuildInputs = [
     autoPatchelfHook
     p7zip
+    makeWrapper
   ];
   buildInputs = [
     libx11
-    libgcc
     stdenv.cc.cc.lib
-    kdePackages.wayland
+    wayland
     libxkbcommon
     vulkan-loader
     libdecor
@@ -43,55 +51,55 @@ stdenv.mkDerivation {
     bzip2
     libxcb-keysyms
     systemd
-    glibc
+    alsa-lib
+    libpulseaudio
+    pipewire
+    libjack2
+    libGL
   ];
   installPhase = ''
     runHook preInstall
-    mkdir -p $out/bin
-    mkdir -p $out/share/septabee
-    cp -r * $out/share/septabee
-    echo "cd $out/share/septabee;./septabee" > $out/bin/septabee
-    chmod +x $out/bin/septabee
+
+    mkdir -p $out/bin $out/share/septabee
+    cp -r * $out/share/septabee/
+
+    chmod +x $out/share/septabee/septabee
+
+    makeWrapper $out/share/septabee/septabee $out/bin/septabee \
+      --chdir "$out/share/septabee" \
+      --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [
+        vulkan-loader
+        alsa-lib
+        libpulseaudio
+        pipewire
+        libjack2
+        libGL
+        libx11
+        wayland
+        libxkbcommon
+      ]}:/run/opengl-driver/lib:/run/opengl-driver-32/lib"
     runHook postInstall
+    cat <<INI > $out/share/applications/septabee.desktop
+    [Desktop Entry]
+    Name=septabee
+    Exec=$out/bin/septabee %f
+    Type=Application
+    Terminal=false
+    INI
   '';
-  postFixup = ''
-    patchelf --add-needed libwayland-client.so.0 $out/share/septabee/septabee
-    patchelf --add-needed libxkbcommon.so.0 $out/share/septabee/septabee
-    patchelf --add-needed libvulkan.so $out/share/septabee/septabee
-    patchelf --add-needed librt.so.1 $out/share/septabee/septabee
-    patchelf --add-needed libdecor-0.so.0 $out/share/septabee/septabee
-    patchelf --add-needed libdrm_amdgpu.so.1 $out/share/septabee/septabee
-    patchelf --add-needed librt.so.1 $out/share/septabee/septabee
-    patchelf --add-needed libzstd.so.1 $out/share/septabee/septabee
-    patchelf --add-needed liblzma.so.5 $out/share/septabee/septabee
-    patchelf --add-needed libbz2.so.1 $out/share/septabee/septabee
-    patchelf --add-needed libxcb-keysyms.so.1 $out/share/septabee/septabee
-    patchelf --add-needed libsystemd.so.0 $out/share/septabee/septabee
+    # Icon=$out/share/hypatia/img/Hypatia_48.ico
 
-    patchelf --add-needed libwayland-client.so.0 $out/share/septabee/septabee-watchdawg
-    patchelf --add-needed libxkbcommon.so.0 $out/share/septabee/septabee-watchdawg
-    patchelf --add-needed libvulkan.so $out/share/septabee/septabee-watchdawg
-    patchelf --add-needed librt.so.1 $out/share/septabee/septabee-watchdawg
-    patchelf --add-needed libdecor-0.so.0 $out/share/septabee/septabee-watchdawg
-    patchelf --add-needed libdrm_amdgpu.so.1 $out/share/septabee/septabee-watchdawg
-    patchelf --add-needed librt.so.1 $out/share/septabee/septabee-watchdawg
-    patchelf --add-needed libzstd.so.1 $out/share/septabee/septabee-watchdawg
-    patchelf --add-needed liblzma.so.5 $out/share/septabee/septabee-watchdawg
-    patchelf --add-needed libbz2.so.1 $out/share/septabee/septabee-watchdawg
-    patchelf --add-needed libxcb-keysyms.so.1 $out/share/septabee/septabee-watchdawg
-    patchelf --add-needed libsystemd.so.0 $out/share/septabee/septabee-watchdawg
+  # mkDesktopItem = {
+  #   name = name;
+  #   desktopName = name;
+  #   comment = "A DAW built around audio rate parameter modulation and a ridiculous amount of optimization.";
+  #   exec = "$out/bin/septabee";
+  # };
 
-    patchelf --add-needed libwayland-client.so.0 $out/share/septabee/septabee-sounds
-    patchelf --add-needed libxkbcommon.so.0 $out/share/septabee/septabee-sounds
-    patchelf --add-needed libvulkan.so $out/share/septabee/septabee-sounds
-    patchelf --add-needed librt.so.1 $out/share/septabee/septabee-sounds
-    patchelf --add-needed libdecor-0.so.0 $out/share/septabee/septabee-sounds
-    patchelf --add-needed libdrm_amdgpu.so.1 $out/share/septabee/septabee-sounds
-    patchelf --add-needed librt.so.1 $out/share/septabee/septabee-sounds
-    patchelf --add-needed libzstd.so.1 $out/share/septabee/septabee-sounds
-    patchelf --add-needed liblzma.so.5 $out/share/septabee/septabee-sounds
-    patchelf --add-needed libbz2.so.1 $out/share/septabee/septabee-sounds
-    patchelf --add-needed libxcb-keysyms.so.1 $out/share/septabee/septabee-sounds
-    patchelf --add-needed libsystemd.so.0 $out/share/septabee/septabee-sounds
-  '';
+  meta = {
+    homepage = "https://septabee.nekoweb.org";
+    description = "A DAW built around audio rate parameter modulation and a ridiculous amount of optimization.";
+    licenses = [ lib.licenses.unfreeRedistributable ];
+    platforms = [ "x86_64-linux" ];
+  };
 }
