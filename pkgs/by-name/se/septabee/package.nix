@@ -24,12 +24,13 @@
   makeDesktopItem
 }:
 let
-  name = "septabee";
+  name = "Septabee";
   version = "B_T9";
     icon = fetchurl {
     url = "https://septabee.nekoweb.org/important_stuff/icon.png";
     sha256 = "sha256-snq/nOYU2gPzC4VR558VjeQ8oXmQE82IolNDDixvtTU=";
   };
+  description = "A bespoke DAW filled with fruits and where Z stands for Pomegranate";
 in stdenv.mkDerivation {
   name = name;
   pname = name;
@@ -91,15 +92,22 @@ in stdenv.mkDerivation {
       name = name;
       desktopName = name;
       icon = icon;
-      comment = "A DAW built around audio rate parameter modulation and a ridiculous amount of optimization.";
+      categories = [
+        "AudioVideo"
+        "Audio"
+        "Music"
+        "Midi"
+      ];
+      comment = description;
       exec = "septabee";
     })
   ];
 
   meta = {
     homepage = "https://septabee.nekoweb.org";
-    description = "A DAW built around audio rate parameter modulation and a ridiculous amount of optimization.";
+    description = description;
     licenses = [ lib.licenses.unfreeRedistributable ];
+    mainProgram = "septabee";
     platforms = [ "x86_64-linux" ];
   };
 }
